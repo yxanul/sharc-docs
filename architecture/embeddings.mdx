@@ -7,23 +7,21 @@ SHARC uses state-of-the-art embeddings to understand the semantic meaning of cod
 
 ## Embedding Model
 
-### SHARC-Embed-Code-001
+### Sharc-Embed
 
 SHARC's embedding model is optimized for code:
 
 | Property | Value |
 |----------|-------|
-| Model | SHARC-Embed-Code-001 |
+| Model | Sharc-Embed |
 | Dimensions | 4096 |
 | Max Tokens | 8192 |
-| Price | $0.01 / 1M tokens |
 
 ### Key Features
 
 1. **Code-optimized**: Trained on large code corpora
 2. **High dimensionality**: 4096 dims capture nuanced semantics
 3. **Long context**: 8K tokens handles large functions
-4. **Cost-effective**: Competitive pricing vs alternatives
 
 ## Embedding Generation
 
@@ -158,13 +156,7 @@ Low similarity (< 0.5):
 
 ### Slow Embedding Generation
 
-1. Check API status at [status.sharc.co](https://status.sharc.co)
-2. Verify batch sizes aren't too small
-3. Ensure requests are properly batched
-
-### Quality Issues
-
-1. Verify full 4096 dimensions stored
-2. Check context injection is working
-3. Ensure code isn't truncated at 8K tokens
+1. Re-index the codebase if search results look stale.
+2. Ensure your codebase indexing completed successfully.
+3. Retry with a more specific semantic query.
 

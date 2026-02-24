@@ -24,12 +24,12 @@ Index a codebase for semantic search. This is typically the first tool you'll us
 1. Scans directory for supported files
 2. Splits code into semantic chunks (AST-based for supported languages)
 3. Generates embeddings
-4. Stores vectors in Qdrant Cloud
-5. Saves Merkle snapshot for future incremental sync
+4. Stores vectors in the search index
+5. Saves a sync snapshot for future incremental sync
 6. Auto-starts file watcher
 
 **Subsequent Runs (Incremental)**:
-1. Loads previous Merkle snapshot
+1. Loads previous sync snapshot
 2. Computes current file hashes
 3. Identifies changed files via diff
 4. Only re-indexes added/modified files
@@ -46,7 +46,7 @@ Index a codebase for semantic search. This is typically the first tool you'll us
   ⎿ Found 342 files (skipping node_modules, .git, dist)
   ⎿ Chunking code (3,450 chunks)
   ⎿ Generating embeddings...
-  ⎿ Storing in Qdrant Cloud
+  ⎿ Storing in search index
   ⎿ ✓ Indexed 3,450 chunks in 22.4s
   ⎿ File watcher started
 ```
@@ -133,8 +133,8 @@ Remove a codebase from the index.
 ### Behavior
 
 1. Stops file watcher (if active)
-2. Deletes Qdrant collection
-3. Removes Merkle snapshot from backend
+2. Deletes indexed data for that codebase
+3. Removes sync snapshot metadata
 4. Clears local caches
 
 ### Example

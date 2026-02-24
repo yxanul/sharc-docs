@@ -77,7 +77,7 @@ Full AST validation for:
 
 ### How It Works
 
-1. Parse file with tree-sitter
+1. Parse file syntax
 2. Check for syntax errors
 3. If errors found:
    - **Keep old vectors** (don't corrupt the index)
@@ -108,9 +108,16 @@ Full AST validation for:
 
 ## File Filters
 
-### Automatically Ignored
+### Soft ignore rules
 
-SHARC skips files that shouldn't be indexed:
+SHARC merges ignore rules from four sources, in this precedence order:
+
+1. Default ignore patterns
+2. Root `.gitignore` patterns
+3. Root `.sharcignore` patterns
+4. `ignorePatterns` passed to `index_codebase`
+
+Default ignore patterns include:
 
 ```
 node_modules/**, target/**, dist/**, build/**, out/**, .next/**, .nuxt/**, .svelte-kit/**,
@@ -119,6 +126,22 @@ node_modules/**, target/**, dist/**, build/**, out/**, .next/**, .nuxt/**, .svel
 .git/**, .svn/**, .hg/**, .idea/**, .vscode/**, tmp/**, temp/**, logs/**, *.log, *.min.js,
 *.min.css, *.bundle.js, *.chunk.js, *.map
 ```
+
+### Hard safety blocks
+
+Some paths and files are always blocked even if they are not in ignore patterns.
+
+Blocked system paths:
+
+- Windows: `C:\Windows`, `C:\Program Files`, `C:\Program Files (x86)`, `C:\ProgramData`, `$Recycle.Bin`, `System Volume Information`
+- POSIX: `/proc`, `/sys`, `/dev`, `/run`, `/boot`, `/lib`, `/lib64`, `/system`, `/Library`, `/private/var/vm`
+
+Blocked sensitive/binary content:
+
+- Secret/env files: `.env`, `.env.*` (except `.env.example`)
+- Key/cert files: `.pem`, `.key`, `.p12`, `.pfx`
+- Binaries/media/archives/docs: executable, object, image, audio/video, archive, and office/PDF file types
+- OS/editor artifacts: `.DS_Store`, `Thumbs.db`, `.suo`, `.ntvs_analysis.dat`
 
 ### Size Limits
 
@@ -216,7 +239,7 @@ To re-enable:
 
 ### Slow Updates
 
-1. Check network connectivity to backend
+1. Check network connectivity
 2. Large files take longer to process
 3. Many simultaneous changes batch together
 

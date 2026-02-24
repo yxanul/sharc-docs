@@ -66,9 +66,9 @@ SHARC provides **7 MCP tools** organized into three categories:
 
 SHARC delegates all heavy operations to the backend:
 
-- **Embeddings** - Generated via SHARC-Embed-Code-001
+- **Embeddings** - Generated via Sharc-Embed
 - **Vector Storage** - Hybrid search (dense + BM25 sparse)
-- **Sync State** - Merkle snapshots for incremental updates
+- **Sync State** - Sync snapshots for incremental updates
 
 This keeps the MCP server lightweight and fast.
 
@@ -92,28 +92,13 @@ After initial indexing, SHARC automatically watches for changes:
 - Syntax validation prevents indexing broken code
 - Changes sync to backend incrementally
 
-## Quick Reference
+## What to ask your assistant
 
-```typescript
-// Index a codebase
-index_codebase({
-  path: "/absolute/path/to/project",
-  force: false,  // Set true to rebuild from scratch
-  customExtensions: [".vue", ".svelte"],  // Additional file types
-  ignorePatterns: ["vendor/**"]  // Files to skip
-})
+Use natural prompts in your MCP client, for example:
 
-// Search for code
-search_code({
-  path: "/absolute/path/to/project",
-  query: "authentication middleware",
-  limit: 3,  // Default: 3, Max: 50
-  extensionFilter: [".ts", ".tsx"]  // Optional file type filter
-})
-
-// Check status
-get_indexing_status({ path: "/absolute/path/to/project" })
-```
+- `Index this codebase for semantic search.`
+- `How does authentication middleware work in this project?`
+- `Show indexing status for this repository.`
 
 ## Next Steps
 
