@@ -1,0 +1,95 @@
+---
+title: Installation
+description: Install SHARC MCP server and configure your environment
+---
+
+SHARC runs as an MCP (Model Context Protocol) server that connects to your AI assistant. The server communicates with the SHARC backend for embeddings, search, and storage.
+
+## Requirements
+
+- **Node.js 18+** or **Bun 1.0+**
+- **SHARC API key** from your plan
+- **MCP-compatible client** - Claude Code, Cursor, VS Code, etc.
+
+## Installation Methods
+
+### Option 1: npx (Recommended)
+
+The easiest way to run SHARC is via npx. No installation required:
+
+```bash
+npx @sharc-code/mcp@latest
+```
+
+This downloads and runs the latest version automatically.
+
+### Option 2: Global Installation
+
+Install globally for faster startup:
+
+```bash
+npm install -g @sharc-code/mcp
+# or
+bun install -g @sharc-code/mcp
+```
+
+Then run with:
+
+```bash
+sharc-mcp
+```
+
+### Option 3: Local Installation
+
+For development or version pinning:
+
+```bash
+npm install @sharc-code/mcp
+# or
+bun add @sharc-code/mcp
+```
+
+## Environment Variables
+
+SHARC requires one environment variable:
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SHARC_API_KEY` | Yes | Your authentication key |
+
+### Example
+
+```bash
+SHARC_API_KEY=sk_your_key_here
+```
+
+## Verify Installation
+
+After configuring your MCP client, verify SHARC is working:
+
+1. Open your AI assistant
+2. Ask it to list available MCP tools
+3. You should see 7 SHARC tools:
+   - `index_codebase`
+   - `search_code`
+   - `clear_index`
+   - `get_indexing_status`
+   - `start_watch`
+   - `stop_watch`
+   - `get_watch_status`
+
+## Troubleshooting
+
+### "Invalid API key" Error
+
+Check that your API key:
+- Starts with `sk_`
+- Is correctly set in your MCP configuration
+- Has not expired
+
+### MCP Tools Not Appearing
+
+1. Restart your AI assistant
+2. Check MCP server logs for errors
+3. Verify the environment variables are set correctly
+

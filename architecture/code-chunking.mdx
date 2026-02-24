@@ -1,0 +1,352 @@
+---
+title: Code Chunking
+description: How SHARC splits code into semantic units
+---
+
+Code chunking is critical for semantic search quality. SHARC uses a tiered strategy that matches chunking approach to content type.
+
+## Tiered Chunking Strategy
+
+Different content needs different treatment:
+
+| Tier | Content Type | Max Size | Overlap | Splitter |
+|------|-------------|----------|---------|----------|
+| 1 | Code (AST) | 3500 chars | 0 | AST-based |
+| 2 | Documentation | 1500 chars | 150 | LangChain |
+| 3 | Configuration | 1500 chars | 100 | LangChain |
+| 4 | Other Code | 1500 chars | 100 | LangChain |
+
+## Tier 1: AST-Based Chunking
+
+For languages with AST support, code is split at semantic boundaries.
+
+### Supported Languages
+
+```
+TypeScript (.ts, .tsx)
+JavaScript (.js, .jsx, .mjs, .cjs)
+Python (.py)
+Go (.go)
+Rust (.rs)
+Java (.java)
+C# (.cs)
+C/C++ (.c, .cpp, .h)
+Scala (.scala)
+```
+
+### How It Works
+
+```typescript
+// Input file: auth.ts
+export class AuthService {
+  private jwtSecret: string;
+
+  constructor(secret: string) {
+    this.jwtSecret = secret;
+  }
+
+  async authenticate(token: string): Promise<User> {
+    const decoded = jwt.verify(token, this.jwtSecret);
+    return this.findUser(decoded.sub);
+  }
+
+  private async findUser(id: string): Promise<User> {
+    return db.users.findUnique({ where: { id } });
+  }
+}
+```
+
+```typescript
+// Output chunks:
+
+// Chunk 1: Class with constructor
+// Context: class AuthService (auth.ts)
+export class AuthService {
+  private jwtSecret: string;
+  constructor(secret: string) {
+    this.jwtSecret = secret;
+  }
+}
+
+// Chunk 2: authenticate method
+// Context: class AuthService (auth.ts)
+async authenticate(token: string): Promise<User> {
+  const decoded = jwt.verify(token, this.jwtSecret);
+  return this.findUser(decoded.sub);
+}
+
+// Chunk 3: findUser method
+// Context: class AuthService (auth.ts)
+private async findUser(id: string): Promise<User> {
+  return db.users.findUnique({ where: { id } });
+}
+```
+
+### Context Injection
+
+Each chunk receives context about its location, including parent classes, modules, and decorators/annotations:
+
+```typescript
+// TypeScript/JavaScript
+// Context: class UserService > module auth (services/user.ts)
+
+// Python
+# Context: class UserService (services/user.py)
+
+// Go
+// Context: package auth > func Authenticate (auth/handler.go)
+```
+
+### Decorator/Annotation Context
+
+SHARC extracts decorators and annotations, embedding them in the context for better semantic understanding:
+
+```typescript
+// TypeScript with decorators:
+// Context: class UserController @Controller("/users") (controllers/user.ts)
+// @Get("/:id") @Auth @RateLimit(100)
+async getUser(id: string): Promise<User> {
+  return this.userService.findById(id);
+}
+```
+
+```python
+# Python with decorators:
+# Context: class UserView (views/user.py)
+# @login_required @cache_response(60)
+def get_user(self, request, user_id):
+    return User.objects.get(id=user_id)
+```
+
+```java
+// Java with annotations:
+// Context: class UserController @RestController @RequestMapping("/api") (UserController.java)
+// @GetMapping("/{id}") @PreAuthorize("hasRole('USER')")
+public User getUser(@PathVariable String id) {
+    return userService.findById(id);
+}
+```
+
+```rust
+// Rust with attributes:
+// Context: impl UserService (services/user.rs)
+// #[instrument] #[cached(time=60)]
+pub async fn get_user(&self, id: &str) -> Result<User, Error> {
+    self.repo.find_by_id(id).await
+}
+```
+
+**Supported decorator syntax:**
+- **TypeScript/JavaScript**: `@Decorator()`, `@decorator`
+- **Python**: `@decorator`, `@decorator(args)`
+- **Java**: `@Annotation`, `@Annotation(value)`
+- **C#**: `[Attribute]`, `[Attribute(args)]`
+- **Rust**: `#[attribute]`, `#[derive(...)]`
+- **Scala**: `@annotation`
+
+### Container Nodes
+
+These nodes provide context but aren't chunked separately:
+
+- Classes
+- Interfaces
+- Modules
+- Namespaces
+- Impl blocks (Rust)
+
+### Leaf Nodes
+
+These are extracted as individual chunks:
+
+- Functions
+- Methods
+- Arrow functions
+- Property assignments
+
+## Tier 2: Documentation Chunking
+
+For markdown and text files:
+
+```markdown
+# Authentication Guide
+
+## Overview
+Authentication in SHARC uses JWT tokens...
+
+## Setup
+First, configure your environment...
+
+## Usage
+To authenticate a user:
+```
+
+**Chunking result:**
+- Smaller chunks (1500 chars)
+- 150 char overlap preserves context
+- Section headers kept with content
+
+### Why Overlap?
+
+Documentation flows between sections. Overlap ensures:
+
+```
+Chunk 1: "...JWT tokens are signed with HS256."
+Chunk 2: "tokens are signed with HS256. To verify..."
+         ↑ Overlap preserves context
+```
+
+## Tier 3: Configuration Chunking
+
+For JSON, YAML, TOML:
+
+```yaml
+# config.yaml
+database:
+  host: localhost
+  port: 5432
+  name: myapp
+
+auth:
+  secret: ${JWT_SECRET}
+  expiry: 3600
+```
+
+**Chunking behavior:**
+- Groups related keys together
+- 100 char overlap for context
+- Preserves structure
+
+## Tier 4: Other Code
+
+For languages without AST support:
+
+```ruby
+# Ruby (no AST parser)
+class UserController < ApplicationController
+  def index
+    @users = User.all
+  end
+
+  def show
+    @user = User.find(params[:id])
+  end
+end
+```
+
+**Chunking behavior:**
+- Character-based splitting
+- 100 char overlap
+- May split mid-function
+
+## File Context
+
+All chunks include file information:
+
+```typescript
+// Non-code files get file context:
+// File: docs/ARCHITECTURE.md
+## 4. MCP Server Architecture
+...
+
+// Code files get AST context:
+// Context: class AuthMiddleware (middleware/auth.ts)
+async handle(req: Request) { ... }
+```
+
+## Size Limits
+
+### Per-Chunk Limits
+
+| Tier | Max Characters |
+|------|----------------|
+| Code | 3500 |
+| Docs | 1500 |
+| Config | 1500 |
+| Other | 1500 |
+
+### Per-File Limits
+
+- Maximum file size: 1MB
+- Files larger than this are skipped
+- Prevents indexing minified bundles
+
+## Custom Extensions
+
+Add file types during indexing:
+
+```typescript
+index_codebase({
+  path: "/project",
+  customExtensions: [".vue", ".svelte", ".astro"]
+})
+```
+
+These use Tier 4 chunking (LangChain).
+
+## Ignore Patterns
+
+Skip files/directories:
+
+```typescript
+index_codebase({
+  path: "/project",
+  ignorePatterns: [
+    "vendor/**",
+    "*.generated.ts",
+    "dist/**"
+  ]
+})
+```
+
+## Default Ignores
+
+Always skipped:
+
+```
+node_modules/**, target/**, dist/**, build/**, out/**, .next/**, .nuxt/**, .svelte-kit/**,
+.turbo/**, .parcel-cache/**, .cache/**, coverage/**, .nyc_output/**, __pycache__/**,
+.pytest_cache/**, .mypy_cache/**, .ruff_cache/**, .tox/**, .nox/**, .venv/**, venv/**, env/**,
+.git/**, .svn/**, .hg/**, .idea/**, .vscode/**, tmp/**, temp/**, logs/**, *.log, *.min.js,
+*.min.css, *.bundle.js, *.chunk.js, *.map
+```
+
+Custom `ignorePatterns` use glob semantics, so patterns like `static/**`, `*.tmp`, and `private/**` behave as expected.
+Optional team-dependent patterns such as `vendor/**`, `third_party/**`, and `generated/**` are opt-in.
+
+## Chunking Quality
+
+### Good Chunks
+
+```typescript
+// ✅ Complete semantic unit
+async function authenticate(token: string): Promise<User> {
+  const decoded = jwt.verify(token, secret);
+  return findUser(decoded.sub);
+}
+```
+
+### Bad Chunks (Avoided)
+
+```typescript
+// ❌ Truncated mid-function (avoided by AST)
+async function authenticate(token: string): Promise<User> {
+  const decoded = jwt.verify(token,
+// --- chunk boundary ---
+```
+
+## Debugging Chunks
+
+To see how your code is chunked:
+
+```typescript
+// After indexing, search for a specific function
+search_code({
+  query: "authenticate function",
+  limit: 1
+})
+
+// Result shows the chunk boundaries:
+// Location: src/auth.ts:45-67
+// This tells you lines 45-67 are one chunk
+```
+

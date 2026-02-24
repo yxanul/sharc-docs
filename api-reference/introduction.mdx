@@ -1,33 +1,14 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: MCP backend API
+description: HTTP endpoints used by the SHARC MCP server
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+These endpoints are shown for informational context only.
 
-## Welcome
+<Warning>
+  Do not call these endpoints directly in normal usage. SHARC should be used through MCP tools only.
+</Warning>
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+Use SHARC from your MCP client (Claude Code, Cursor, VS Code, Windsurf, and similar tools).
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
-
-## Authentication
-
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
-
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
-```
+If you need direct inference API access, contact `contact@sharc.sh`.

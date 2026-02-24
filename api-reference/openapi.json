@@ -1,216 +1,484 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "SHARC MCP Backend API",
+    "version": "1.0.0",
+    "description": "HTTP endpoints used by the SHARC MCP server for indexing and semantic search workflows."
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "https://api.sharc.dev",
+      "description": "Production"
     }
   ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
-  "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key",
+        "description": "Pass your key in Authorization: Bearer <key>."
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
-      "post": {
-        "description": "Information about a new plant added to the store",
-        "requestBody": {
-          "description": "Plant added to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
-  },
-  "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
+      "ErrorResponse": {
         "type": "object",
         "properties": {
           "error": {
-            "type": "integer",
-            "format": "int32"
+            "type": "object",
+            "properties": {
+              "message": { "type": "string" },
+              "type": { "type": "string" },
+              "param": { "type": ["string", "null"] },
+              "code": { "type": ["string", "null"] }
+            },
+            "required": ["message", "type"]
+          }
+        },
+        "required": ["error"]
+      },
+      "EmbeddingsRequest": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" }, "maxItems": 1000 }
+            ]
           },
-          "message": {
-            "type": "string"
+          "model": {
+            "type": "string",
+            "description": "Optional embedding model override."
+          },
+          "encoding_format": {
+            "type": "string",
+            "enum": ["float", "base64"]
+          }
+        },
+        "required": ["input"]
+      },
+      "EmbeddingItem": {
+        "type": "object",
+        "properties": {
+          "embedding": {
+            "type": "array",
+            "items": { "type": "number" }
+          },
+          "index": { "type": "integer" }
+        },
+        "required": ["embedding", "index"]
+      },
+      "EmbeddingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EmbeddingItem" }
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "prompt_tokens": { "type": "integer" },
+              "total_tokens": { "type": "integer" }
+            }
+          }
+        },
+        "required": ["data"]
+      },
+      "RerankRequest": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "documents": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "properties": { "text": { "type": "string" } },
+                  "required": ["text"]
+                }
+              ]
+            },
+            "maxItems": 1000
+          }
+        },
+        "required": ["query", "documents"]
+      },
+      "RerankResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "index": { "type": "integer" },
+                "relevance_score": { "type": "number" }
+              },
+              "required": ["index", "relevance_score"]
+            }
+          }
+        },
+        "required": ["results"]
+      },
+      "CodeChunk": {
+        "type": "object",
+        "properties": {
+          "content": { "type": "string" },
+          "relativePath": { "type": "string" },
+          "startLine": { "type": "integer" },
+          "endLine": { "type": "integer" },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["content", "relativePath", "startLine", "endLine"]
+      },
+      "IndexRequest": {
+        "type": "object",
+        "properties": {
+          "collection": { "type": "string" },
+          "chunks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CodeChunk" },
+            "minItems": 1
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["collection", "chunks"]
+      },
+      "IndexResponse": {
+        "type": "object",
+        "properties": {
+          "indexed": { "type": "integer" },
+          "collection": { "type": "string" }
+        }
+      },
+      "SearchRequest": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "collection": { "type": "string" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 50 },
+          "extensionFilter": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["query", "collection"]
+      },
+      "SearchResult": {
+        "type": "object",
+        "properties": {
+          "score": { "type": "number" },
+          "content": { "type": "string" },
+          "relativePath": { "type": "string" },
+          "startLine": { "type": "integer" },
+          "endLine": { "type": "integer" }
+        }
+      },
+      "SearchResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SearchResult" }
+          }
+        }
+      },
+      "RepoListResponse": {
+        "type": "object",
+        "properties": {
+          "repos": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "FilesRequest": {
+        "type": "object",
+        "properties": {
+          "collection": { "type": "string" },
+          "limit": { "type": "integer" },
+          "offset": { "type": "integer" }
+        },
+        "required": ["collection"]
+      },
+      "FileItem": {
+        "type": "object",
+        "properties": {
+          "relativePath": { "type": "string" },
+          "chunkCount": { "type": "integer" }
+        }
+      },
+      "FilesResponse": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FileItem" }
+          }
+        }
+      },
+      "SyncSaveRequest": {
+        "type": "object",
+        "properties": {
+          "collection": { "type": "string" },
+          "snapshot": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": ["collection", "snapshot"]
+      },
+      "SyncLoadRequest": {
+        "type": "object",
+        "properties": {
+          "collection": { "type": "string" }
+        },
+        "required": ["collection"]
+      },
+      "SyncResponse": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "snapshot": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/v1/embeddings": {
+      "post": {
+        "operationId": "createEmbeddings",
+        "summary": "Generate embeddings",
+        "description": "Generates dense vector embeddings for one or more text/code inputs.",
+        "tags": ["MCP backend"],
+        "security": [{ "apiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EmbeddingsRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Embeddings generated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EmbeddingsResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
           }
         }
       }
     },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+    "/v1/rerank": {
+      "post": {
+        "operationId": "rerankDocuments",
+        "summary": "Rerank candidate documents",
+        "description": "Reranks candidate snippets for a query.",
+        "tags": ["MCP backend"],
+        "security": [{ "apiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RerankRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rerank results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RerankResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/index": {
+      "post": {
+        "operationId": "indexChunks",
+        "summary": "Index code chunks",
+        "description": "Stores chunks, embeddings, and metadata for a collection.",
+        "tags": ["MCP backend"],
+        "security": [{ "apiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/IndexRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indexing accepted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IndexResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/search": {
+      "post": {
+        "operationId": "searchCode",
+        "summary": "Search indexed code",
+        "description": "Hybrid semantic search over an indexed collection.",
+        "tags": ["MCP backend"],
+        "security": [{ "apiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SearchRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SearchResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/repos": {
+      "get": {
+        "operationId": "listRepos",
+        "summary": "List indexed repositories",
+        "description": "Lists repository collections currently indexed for the authenticated key.",
+        "tags": ["MCP backend"],
+        "security": [{ "apiKey": [] }],
+        "responses": {
+          "200": {
+            "description": "Repository list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RepoListResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/files": {
+      "post": {
+        "operationId": "listFiles",
+        "summary": "List indexed files for a repository",
+        "description": "Returns file-level metadata for an indexed collection.",
+        "tags": ["MCP backend"],
+        "security": [{ "apiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FilesRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FilesResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sync/save": {
+      "post": {
+        "operationId": "saveSyncSnapshot",
+        "summary": "Save Merkle sync snapshot",
+        "description": "Stores snapshot data used for incremental re-indexing.",
+        "tags": ["MCP backend"],
+        "security": [{ "apiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SyncSaveRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Snapshot saved",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SyncResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/sync/load": {
+      "post": {
+        "operationId": "loadSyncSnapshot",
+        "summary": "Load Merkle sync snapshot",
+        "description": "Loads the latest snapshot for incremental indexing decisions.",
+        "tags": ["MCP backend"],
+        "security": [{ "apiKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SyncLoadRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Snapshot loaded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SyncResponse" }
+              }
+            }
+          }
+        }
       }
     }
   }

@@ -1,0 +1,69 @@
+---
+title: Getting Started
+description: Get up and running with SHARC in minutes
+---
+
+SHARC provides semantic code search capabilities through the Model Context Protocol (MCP). This guide will help you set up SHARC with your preferred AI assistant.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **Node.js 18+** or **Bun 1.0+** installed
+- A **SHARC API key** from your plan
+- An MCP-compatible AI assistant (Claude Code, Cursor, VS Code, etc.)
+
+## Quick Start
+
+The fastest way to get started is with **Claude Code**:
+
+```bash
+claude mcp add sharc \
+  -e SHARC_API_KEY=your_api_key \
+  -- npx @sharc-code/mcp@latest
+```
+
+That's it! Now you can index and search your codebases:
+
+```
+> Index this codebase for semantic search
+
+● index_codebase (MCP)
+  ⎿ Indexed 2,450 chunks from 342 files in 18.3s
+
+> How does authentication work?
+
+● search_code (MCP)
+  ⎿ Found 3 results with scores 0.94-0.98
+```
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Installation" href="/getting-started/installation">
+    Detailed installation instructions and requirements.
+  </Card>
+  <Card title="Claude Code Setup" href="/getting-started/claude-code">
+    Complete guide for Claude Code integration.
+  </Card>
+  <Card title="Other Clients" href="/getting-started/other-clients">
+    Setup guides for Cursor, VS Code, Windsurf, and more.
+  </Card>
+</CardGroup>
+
+## How It Works
+
+1. **Index your codebase** - SHARC analyzes your code, splits it into semantic chunks, and creates embeddings
+2. **Ask questions** - Use natural language to search for code functionality
+3. **Get precise results** - Receive ranked code snippets with relevance scores
+4. **Stay updated** - File watching keeps your index current as you code
+
+## Performance
+
+| Scenario | Time | Notes |
+|----------|------|-------|
+| Initial indexing (~2000 chunks) | ~15-20s | Full embedding + vector storage |
+| Re-index (no changes) | ~0.3s | Merkle hash comparison only |
+| Incremental (1-10 files changed) | ~2-4s | Only changed files re-indexed |
+| Search query | ~100-200ms | Hybrid search + reranking |
+

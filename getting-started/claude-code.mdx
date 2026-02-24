@@ -1,0 +1,156 @@
+---
+title: Claude Code Setup
+description: Configure SHARC with Claude Code for semantic code search
+---
+
+Claude Code is the recommended way to use SHARC. This guide covers the complete setup process.
+
+## Quick Setup
+
+Add SHARC to Claude Code with a single command:
+
+```bash
+claude mcp add sharc \
+  -e SHARC_API_KEY=your_api_key \
+  -- npx @sharc-code/mcp@latest
+```
+
+Restart Claude Code, and you're ready to go!
+
+## Manual Configuration
+
+If you prefer manual configuration, add this to your Claude Code settings:
+
+```json
+{
+  "mcpServers": {
+    "sharc": {
+      "command": "npx",
+      "args": ["@sharc-code/mcp@latest"],
+      "env": {
+        "SHARC_API_KEY": "your_api_key"
+      }
+    }
+  }
+}
+```
+
+### Settings File Location
+
+- **macOS/Linux**: `~/.config/claude-code/settings.json`
+- **Windows**: `%APPDATA%\claude-code\settings.json`
+
+## Usage Examples
+
+### Indexing a Codebase
+
+```
+> Please index this codebase for semantic search
+
+● index_codebase (MCP)
+  path: "/Users/you/project"
+  ⎿ Scanning files...
+  ⎿ Found 342 files to index
+  ⎿ Chunking code (AST-based for .ts, .py, .go...)
+  ⎿ Generating embeddings (2,450 chunks)
+  ⎿ Storing in Qdrant Cloud
+  ⎿ ✓ Indexed 2,450 chunks in 18.3s
+```
+
+### Searching Code
+
+```
+> How does the authentication middleware work?
+
+● search_code (MCP)
+  query: "authentication middleware"
+  limit: 3
+  ⎿ Found 3 results for query: "authentication middleware"
+
+  1. Code snippet (typescript) [project]
+     Location: src/middleware/auth.ts:45-89
+     Score: 0.9847
+     ... +44 lines (ctrl+o to expand)
+
+  2. Code snippet (typescript) [project]
+     Location: src/routes/login.ts:12-56
+     Score: 0.9234
+     ... +44 lines (ctrl+o to expand)
+```
+
+### Incremental Updates
+
+After the initial index, SHARC automatically watches for file changes:
+
+```
+> I just modified the auth middleware, is the index updated?
+
+● get_watch_status (MCP)
+  ⎿ Watching: /Users/you/project
+  ⎿ Last update: 2 seconds ago
+  ⎿ Files processed: auth.ts (modified)
+```
+
+## Best Practices
+
+### 1. Index Before Deep Dives
+
+For the best experience, index your codebase before asking complex questions:
+
+```
+> Before we start, please index this codebase
+
+[After indexing completes]
+
+> Now, explain the data flow from API request to database
+```
+
+### 2. Use Natural Language Queries
+
+SHARC understands semantic meaning, not just keywords:
+
+```
+# Good queries:
+"How are users authenticated?"
+"Where is the database connection configured?"
+"Find the error handling for API requests"
+
+# Less effective:
+"auth" (too vague)
+"config.ts" (use glob patterns for file search)
+```
+
+### 3. Adjust Result Limits
+
+For broad exploration, increase the limit:
+
+```
+> Search for all API endpoints with limit 10
+```
+
+For specific answers, keep it low (default 3):
+
+```
+> Where is JWT token validation implemented?
+```
+
+## Troubleshooting
+
+### Tools Not Available
+
+If SHARC tools don't appear, try:
+
+1. Restart Claude Code
+2. Check the MCP server output: `claude mcp logs sharc`
+3. Verify environment variables are set
+
+### Slow Indexing
+
+Initial indexing can take 15-30 seconds for large codebases. Subsequent runs use Merkle diff for ~0.3s updates.
+
+### Search Returns Unexpected Results
+
+- Try rephrasing your query semantically
+- Use `extensionFilter` to narrow to specific file types
+- Check if the codebase is fully indexed with `get_indexing_status`
+

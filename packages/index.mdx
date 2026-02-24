@@ -1,0 +1,153 @@
+---
+title: NPM Packages
+description: SHARC packages published to NPM
+---
+
+SHARC publishes two packages to NPM for integration into your projects.
+
+## @sharc-code/mcp
+
+[![npm version](https://img.shields.io/npm/v/@sharc-code/mcp.svg)](https://www.npmjs.com/package/@sharc-code/mcp)
+
+The MCP server that provides semantic code search to AI assistants.
+
+### Installation
+
+```bash
+npm install @sharc-code/mcp
+# or
+npx @sharc-code/mcp
+```
+
+### Usage with Claude Code
+
+```bash
+claude mcp add sharc \
+  -e SHARC_API_KEY=sk_mcp_xxx \
+  -- npx @sharc-code/mcp
+```
+
+### Features
+
+- 7 MCP tools for indexing and searching code
+- Real-time file watching for incremental updates
+- AST-based code chunking with context injection
+- Merkle-based sync for efficient re-indexing
+
+---
+
+## @sharc-code/splitter
+
+[![npm version](https://img.shields.io/npm/v/@sharc-code/splitter.svg)](https://www.npmjs.com/package/@sharc-code/splitter)
+
+Code chunking library with AST-based splitting and LangChain fallback.
+
+### Installation
+
+```bash
+npm install @sharc-code/splitter
+```
+
+### Usage
+
+```typescript
+import { AstCodeSplitter } from '@sharc-code/splitter';
+
+const splitter = new AstCodeSplitter();
+
+const code = `
+export class UserService {
+  async authenticate(token: string): Promise<User> {
+    return jwt.verify(token);
+  }
+}
+`;
+
+const chunks = await splitter.split(code, 'typescript', 'services/user.ts');
+
+console.log(chunks[0].content);
+// Output:
+// // Context: class UserService (services/user.ts)
+// async authenticate(token: string): Promise<User> {
+//   return jwt.verify(token);
+// }
+```
+
+### Supported Languages (AST)
+
+| Language | Extensions |
+|----------|------------|
+| TypeScript | `.ts`, `.tsx` |
+| JavaScript | `.js`, `.jsx`, `.mjs`, `.cjs` |
+| Python | `.py` |
+| Go | `.go` |
+| Rust | `.rs` |
+| Java | `.java` |
+| C# | `.cs` |
+| C/C++ | `.c`, `.cpp`, `.h` |
+| Scala | `.scala` |
+
+### Features
+
+- **AST-based chunking**: Extracts complete semantic units (functions, classes, methods)
+- **Context injection**: Adds parent class/module context to each chunk
+- **Decorator support**: Extracts `@Decorator`, `#[attribute]`, and `@Annotation` context
+- **LangChain fallback**: Character-based chunking for unsupported languages
+- **Syntax validation**: Detects parse errors before chunking
+
+### API Reference
+
+#### AstCodeSplitter
+
+```typescript
+class AstCodeSplitter {
+  constructor(chunkSize?: number, chunkOverlap?: number);
+  
+  async split(
+    code: string,
+    language: string,
+    filePath?: string
+  ): Promise<CodeChunk[]>;
+  
+  setChunkSize(size: number): void;
+  setChunkOverlap(overlap: number): void;
+  checkSyntaxErrors(code: string, language: string): SyntaxError[];
+}
+
+interface CodeChunk {
+  content: string;
+  startLine: number;
+  endLine: number;
+  metadata?: Record<string, any>;
+}
+```
+
+#### LangChainCodeSplitter
+
+```typescript
+class LangChainCodeSplitter {
+  constructor(chunkSize?: number, chunkOverlap?: number);
+  
+  async split(
+    code: string,
+    language: string,
+    filePath?: string
+  ): Promise<CodeChunk[]>;
+}
+```
+
+---
+
+## Package Versions
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@sharc-code/mcp` | 0.2.1 | MCP server for AI assistants |
+| `@sharc-code/splitter` | 0.2.0 | AST and LangChain code splitters |
+
+## Links
+
+- [MCP Package on NPM](https://www.npmjs.com/package/@sharc-code/mcp)
+- [Splitter Package on NPM](https://www.npmjs.com/package/@sharc-code/splitter)
+- [GitHub Repository](https://github.com/yxanul/SHARC)
+

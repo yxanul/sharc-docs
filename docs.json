@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Sharc",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
@@ -17,32 +17,33 @@
             "group": "Getting started",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "getting-started/index",
+              "getting-started/installation",
+              "getting-started/claude-code",
+              "getting-started/other-clients"
             ]
           },
           {
-            "group": "Customization",
+            "group": "MCP reference",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "mcp/index",
+              "mcp/tools",
+              "mcp/file-watching",
+              "mcp/configuration"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Packages",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "packages/index"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Architecture",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "architecture/index",
+              "architecture/embeddings",
+              "architecture/code-chunking"
             ]
           }
         ]
@@ -51,18 +52,22 @@
         "tab": "API reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
             "pages": [
               "api-reference/introduction"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "MCP backend endpoints",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/endpoint/embeddings",
+              "api-reference/endpoint/rerank",
+              "api-reference/endpoint/index-chunks",
+              "api-reference/endpoint/search",
+              "api-reference/endpoint/repos",
+              "api-reference/endpoint/files",
+              "api-reference/endpoint/sync-save",
+              "api-reference/endpoint/sync-load"
             ]
           }
         ]
@@ -102,15 +107,15 @@
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {

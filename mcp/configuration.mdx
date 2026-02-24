@@ -1,0 +1,54 @@
+---
+title: Configuration
+description: API key configuration for SHARC MCP server
+---
+
+SHARC MCP server authenticates using your SHARC API key.
+
+## Required variable
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `SHARC_API_KEY` | API key from your SHARC plan | `sk_mcp_xxx` |
+
+## Set your API key
+
+### In MCP configuration (recommended)
+
+```json
+{
+  "mcpServers": {
+    "sharc": {
+      "command": "npx",
+      "args": ["-y", "@sharc-code/mcp@latest"],
+      "env": {
+        "SHARC_API_KEY": "sk_mcp_xxx"
+      }
+    }
+  }
+}
+```
+
+### Via `.env.local` (optional)
+
+Create `.env.local` in your MCP package directory:
+
+```bash
+SHARC_API_KEY=sk_mcp_xxx
+```
+
+## Troubleshooting
+
+### Invalid API key
+
+Ensure your key:
+- Starts with `sk_`
+- Is correctly copied with no extra spaces
+- Is still active in your account
+
+### Key not detected
+
+If the MCP tools are not available:
+1. Restart your AI assistant after config changes.
+2. Confirm your config JSON is valid.
+3. Confirm `SHARC_API_KEY` is set in the correct MCP server entry.

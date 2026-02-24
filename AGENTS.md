@@ -14,12 +14,14 @@
 
 ## Terminology
 
-<!-- Add product-specific terms and preferred usage -->
-<!-- Example: Use "workspace" not "project", "member" not "user" -->
+- Use **codebase** for an indexed repository path.
+- Use **collection** for backend index storage.
+- Use **MCP client** for Claude Code, Cursor, VS Code, Windsurf, and similar tools.
+- Use **SHARC backend** for the HTTP service that powers indexing and search.
 
 ## Style preferences
 
-<!-- Add any project-specific style rules below -->
+- Add any project-specific style rules below.
 
 - Use active voice and second person ("you")
 - Keep sentences concise — one idea per sentence
@@ -29,5 +31,6 @@
 
 ## Content boundaries
 
-<!-- Define what should and shouldn't be documented -->
-<!-- Example: Don't document internal admin features -->
+- Document MCP setup, indexing/search workflows, file watching, and operational configuration.
+- Do not document delayed/removed inference API endpoints in this site.
+- Do not document internal admin-only dashboard behavior unless explicitly requested.

@@ -1,0 +1,292 @@
+---
+title: MCP Tools Reference
+description: Complete reference for all 7 SHARC MCP tools
+---
+
+SHARC provides 7 MCP tools for indexing and searching codebases. This page documents each tool's parameters, behavior, and usage examples.
+
+## index_codebase
+
+Index a codebase for semantic search. This is typically the first tool you'll use.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Absolute path to the codebase directory |
+| `force` | boolean | No | Force full re-index (deletes existing index) |
+| `customExtensions` | string[] | No | Additional file extensions to include |
+| `ignorePatterns` | string[] | No | Glob patterns to exclude |
+
+### Behavior
+
+**First Run (Full Indexing)**:
+1. Scans directory for supported files
+2. Splits code into semantic chunks (AST-based for supported languages)
+3. Generates embeddings
+4. Stores vectors in Qdrant Cloud
+5. Saves Merkle snapshot for future incremental sync
+6. Auto-starts file watcher
+
+**Subsequent Runs (Incremental)**:
+1. Loads previous Merkle snapshot
+2. Computes current file hashes
+3. Identifies changed files via diff
+4. Only re-indexes added/modified files
+5. Removes vectors for deleted files
+
+### Example
+
+```
+> Please index this codebase
+
+● index_codebase (MCP)
+  path: "D:\\projects\\my-app"
+  ⎿ Scanning files...
+  ⎿ Found 342 files (skipping node_modules, .git, dist)
+  ⎿ Chunking code (3,450 chunks)
+  ⎿ Generating embeddings...
+  ⎿ Storing in Qdrant Cloud
+  ⎿ ✓ Indexed 3,450 chunks in 22.4s
+  ⎿ File watcher started
+```
+
+---
+
+## search_code
+
+Search indexed code using natural language queries.
+
+### Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `path` | string | Yes | - | Codebase directory |
+| `query` | string | Yes | - | Natural language search query |
+| `limit` | number | No | 3 | Max results (1-50) |
+| `extensionFilter` | string[] | No | - | Filter by file extensions |
+
+### Behavior
+
+1. Generates embedding for query
+2. Performs hybrid search (dense vectors + BM25 sparse)
+3. Reranks results for better relevance
+4. Returns ranked code snippets with metadata
+
+### Result Format
+
+Each result includes:
+- **Location**: File path and line numbers
+- **Score**: Relevance score (0-1, higher is better)
+- **Code**: The matching code snippet
+- **Context**: Surrounding class/function information
+
+### Example
+
+```
+> How does authentication work in this project?
+
+● search_code (MCP)
+  path: "D:\\projects\\my-app"
+  query: "authentication"
+  limit: 3
+  ⎿ Found 3 results for query: "authentication"
+
+  1. Code snippet (typescript) [my-app]
+     Location: src/middleware/auth.ts:45-89
+     Score: 0.9847
+     // Context: class AuthMiddleware
+     async authenticate(req: Request): Promise<User> {
+       const token = req.headers.authorization?.split(' ')[1];
+       if (!token) throw new UnauthorizedError();
+       return this.jwtService.verify(token);
+     }
+     ... +34 lines
+
+  2. Code snippet (typescript) [my-app]
+     Location: src/services/jwt.service.ts:12-45
+     Score: 0.9234
+     ...
+```
+
+### Query Tips
+
+| Query Type | Example | Notes |
+|------------|---------|-------|
+| Semantic | "user login flow" | Understands meaning |
+| Specific | "JWT token validation" | Technical terms work |
+| Behavioral | "error handling for API" | Describes functionality |
+| Exploratory | "database queries" | Finds related code |
+
+---
+
+## clear_index
+
+Remove a codebase from the index.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Codebase directory to remove |
+
+### Behavior
+
+1. Stops file watcher (if active)
+2. Deletes Qdrant collection
+3. Removes Merkle snapshot from backend
+4. Clears local caches
+
+### Example
+
+```
+> Remove this project from the index
+
+● clear_index (MCP)
+  path: "D:\\projects\\old-app"
+  ⎿ Stopped file watcher
+  ⎿ Deleted collection: old-app
+  ⎿ Removed metadata
+  ⎿ ✓ Index cleared
+```
+
+---
+
+## get_indexing_status
+
+Check the indexing status of a codebase.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Codebase directory |
+
+### Response States
+
+| Status | Description |
+|--------|-------------|
+| `indexed` | Fully indexed and ready |
+| `indexing` | Currently indexing (shows progress %) |
+| `indexfailed` | Indexing failed (shows error) |
+| `not_indexed` | Not yet indexed |
+
+### Example
+
+```
+> What's the indexing status?
+
+● get_indexing_status (MCP)
+  path: "D:\\projects\\my-app"
+  ⎿ Status: indexed ✓
+  ⎿ Chunks: 3,450
+  ⎿ Last updated: 2 minutes ago
+  ⎿ File watcher: active
+```
+
+---
+
+## start_watch
+
+Start watching a codebase for file changes.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Codebase directory to watch |
+
+### Behavior
+
+- Requires codebase to be already indexed
+- Uses chokidar for file system events
+- 2-second debounce for batched processing
+- Automatically filters unsupported files
+- Validates syntax before indexing (prevents broken code)
+
+### Example
+
+```
+> Start watching this project for changes
+
+● start_watch (MCP)
+  path: "D:\\projects\\my-app"
+  ⎿ ✓ Started watching D:\\projects\\my-app
+  ⎿ Monitoring 342 files
+```
+
+<Info>
+  File watching starts automatically after `index_codebase` completes. You only need `start_watch` if you previously stopped watching.
+</Info>
+
+---
+
+## stop_watch
+
+Stop watching a codebase for file changes.
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `path` | string | Yes | Codebase directory to stop watching |
+
+### Example
+
+```
+> Stop watching this project
+
+● stop_watch (MCP)
+  path: "D:\\projects\\my-app"
+  ⎿ ✓ Stopped watching D:\\projects\\my-app
+```
+
+---
+
+## get_watch_status
+
+Get the list of codebases currently being watched.
+
+### Parameters
+
+None.
+
+### Example
+
+```
+> What codebases are being watched?
+
+● get_watch_status (MCP)
+  ⎿ Currently watching 2 codebases:
+  ⎿ 1. D:\\projects\\my-app (3,450 chunks)
+  ⎿ 2. D:\\projects\\api-server (1,234 chunks)
+```
+
+---
+
+## Supported File Extensions
+
+### Tier 1: AST-Parsed (Best Quality)
+
+Full semantic understanding with context injection:
+
+`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`, `.java`, `.cs`, `.cpp`, `.c`, `.h`, `.scala`
+
+### Tier 2: Documentation
+
+Character-based chunking with overlap:
+
+`.md`, `.mdx`, `.rst`, `.txt`
+
+### Tier 3: Configuration
+
+Grouped key-value chunking:
+
+`.json`, `.yaml`, `.yml`, `.toml`, `.xml`, `.ini`, `.cfg`
+
+### Tier 4: Other Code
+
+Fallback chunking for unsupported languages:
+
+`.rb`, `.php`, `.swift`, `.kt`, `.vue`, `.svelte`, `.html`, `.css`, `.scss`, `.sql`
+
