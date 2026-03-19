@@ -17,6 +17,7 @@ Index a codebase for semantic search. This is typically the first tool you'll us
 | `force` | boolean | No | Force full re-index (deletes existing index) |
 | `customExtensions` | string[] | No | Additional file extensions to include |
 | `ignorePatterns` | string[] | No | Glob patterns to exclude |
+| `guardOverrideToken` | string | No | One-shot token to bypass multi-repo guard |
 
 ### Behavior
 
@@ -27,6 +28,15 @@ Index a codebase for semantic search. This is typically the first tool you'll us
 4. Stores vectors in the search index
 5. Saves a sync snapshot for future incremental sync
 6. Auto-starts file watcher
+
+**Multi-repo guard**:
+
+If the target path contains 2 or more immediate child git repositories (e.g., `~/projects` containing multiple repos), SHARC blocks indexing and returns a `guarded_block` response with:
+- The number of detected repos and sample paths
+- A one-shot `guardOverrideToken` to proceed if intentional
+- Guidance to index a specific child repo instead
+
+This prevents accidentally indexing broad parent directories, which produces mixed search results and wastes token budget.
 
 **Subsequent Runs (Incremental)**:
 1. Loads previous sync snapshot
@@ -65,6 +75,21 @@ Search indexed code using natural language queries.
 | `query` | string | Yes | - | Natural language search query |
 | `limit` | number | No | 3 | Max results (1-50) |
 | `extensionFilter` | string[] | No | - | Filter by file extensions |
+| `searchMode` | string | No | `auto` | Filter results by document type |
+
+### Search Modes
+
+The `searchMode` parameter controls which types of code are returned:
+
+| Mode | Behavior |
+|------|----------|
+| `auto` | Returns all result types, ranked by relevance (default) |
+| `implementation_only` | Excludes tests and documentation, returns only source code |
+| `tests_only` | Returns only test files (`*.test.*`, `*.spec.*`, `__tests__/`) |
+| `docs_only` | Returns only documentation and examples (`*.md`, `docs/`, `examples/`) |
+| `prefer_implementation` | Ranks source code higher, but includes other types as fallback |
+
+This is useful when an agent needs to find specific categories of code. For example, use `implementation_only` when looking for how a feature works, or `tests_only` when looking for test coverage of a function.
 
 ### Behavior
 
@@ -80,6 +105,18 @@ Each result includes:
 - **Score**: Relevance score (0-1, higher is better)
 - **Code**: The matching code snippet
 - **Context**: Surrounding class/function information
+
+### Understanding Scores
+
+SHARC uses hybrid retrieval (dense vectors + BM25 sparse matching) combined with a reranker, which produces well-calibrated relevance scores:
+
+| Score Range | Meaning |
+|-------------|---------|
+| **0.90+** | Highly relevant. With targeted queries, scores of 0.98-0.99 indicate a precise match to the query. |
+| **0.80 - 0.89** | Likely relevant. Related code that may partially match the intent. |
+| **< 0.50** | Usually not relevant. The code is tangential or unrelated. |
+
+If a targeted query does not return results in the 0.9+ range, it typically means the implementation doesn't exist in the codebase, the query was too vague, or the implementation itself is loosely structured. Try rephrasing with more specific terms.
 
 ### Example
 
@@ -270,7 +307,7 @@ None.
 
 Full semantic understanding with context injection:
 
-`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, `.go`, `.rs`, `.java`, `.cs`, `.cpp`, `.c`, `.h`, `.scala`
+`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.py`, `.pyw`, `.go`, `.rs`, `.java`, `.cs`, `.cpp`, `.cc`, `.cxx`, `.c`, `.h`, `.hpp`, `.scala`
 
 ### Tier 2: Documentation
 
@@ -282,11 +319,11 @@ Character-based chunking with overlap:
 
 Grouped key-value chunking:
 
-`.json`, `.yaml`, `.yml`, `.toml`, `.xml`, `.ini`, `.cfg`
+`.json`, `.yaml`, `.yml`, `.toml`, `.xml`, `.env.example`, `.ini`, `.cfg`
 
 ### Tier 4: Other Code
 
 Fallback chunking for unsupported languages:
 
-`.rb`, `.php`, `.swift`, `.kt`, `.vue`, `.svelte`, `.html`, `.css`, `.scss`, `.sql`
+`.rb`, `.php`, `.swift`, `.kt`, `.kts`, `.vue`, `.svelte`, `.html`, `.css`, `.scss`, `.less`, `.sql`
 

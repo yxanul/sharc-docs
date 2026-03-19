@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://api.sharc.dev",
+      "url": "https://api.sharc.sh",
       "description": "Production"
     }
   ],

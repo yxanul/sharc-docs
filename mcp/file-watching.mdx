@@ -110,12 +110,39 @@ Full AST validation for:
 
 ### Soft ignore rules
 
-SHARC merges ignore rules from four sources, in this precedence order:
+SHARC merges ignore rules from four sources, in this precedence order (highest precedence last):
 
-1. Default ignore patterns
+1. Default ignore patterns (always applied)
 2. Root `.gitignore` patterns
 3. Root `.sharcignore` patterns
 4. `ignorePatterns` passed to `index_codebase`
+
+### `.sharcignore`
+
+Create a `.sharcignore` file at the root of your repository to permanently exclude paths from indexing. It follows the same syntax as `.gitignore`:
+
+```gitignore
+# Ignore generated code
+generated/**
+proto/**
+
+# Ignore specific directories
+internal/legacy/**
+
+# Negation: re-include a file excluded by .gitignore
+!generated/keep.ts
+```
+
+Rules:
+- One pattern per line
+- Lines starting with `#` are comments
+- Trailing `/` is treated as a directory (e.g., `logs/` becomes `logs/**`)
+- Prefix a pattern with `!` to negate (re-include something excluded by an earlier rule or `.gitignore`)
+- `.sharcignore` takes precedence over `.gitignore` — use it to override `.gitignore` rules that make sense for git but not for code search
+
+<Tip>
+  Use `.sharcignore` for patterns your whole team should share. Use the `ignorePatterns` parameter on `index_codebase` for one-off exclusions.
+</Tip>
 
 Default ignore patterns include:
 

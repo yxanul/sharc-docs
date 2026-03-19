@@ -11,7 +11,7 @@ Add SHARC to Claude Code with a single command:
 
 ```bash
 claude mcp add sharc \
-  -e SHARC_API_KEY=your_api_key \
+  -e SHARC_API_KEY=sk_mcp_e364ff9... \
   -- npx @sharc-code/mcp@latest
 ```
 
@@ -28,7 +28,7 @@ If you prefer manual configuration, add this to your Claude Code settings:
       "command": "npx",
       "args": ["@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "your_api_key"
+        "SHARC_API_KEY": "sk_mcp_e364ff9..."
       }
     }
   }
@@ -145,7 +145,7 @@ If SHARC tools don't appear, try:
 
 ### Slow Indexing
 
-Initial indexing can take 15-30 seconds for large codebases. Subsequent runs use Merkle diff for ~0.3s updates.
+Initial indexing time depends on codebase size. Medium-sized repos (e.g., Hono) take ~30-45 seconds, while large repos (e.g., Next.js) can take 3-4 minutes. Subsequent runs use Merkle diff for near-instant updates.
 
 ### Search Returns Unexpected Results
 

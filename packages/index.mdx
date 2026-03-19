@@ -23,7 +23,7 @@ npx @sharc-code/mcp
 
 ```bash
 claude mcp add sharc \
-  -e SHARC_API_KEY=sk_mcp_xxx \
+  -e SHARC_API_KEY=sk_mcp_e364ff9... \
   -- npx @sharc-code/mcp
 ```
 
@@ -84,7 +84,7 @@ console.log(chunks[0].content);
 | Rust | `.rs` |
 | Java | `.java` |
 | C# | `.cs` |
-| C/C++ | `.c`, `.cpp`, `.h` |
+| C/C++ | `.c`, `.cpp`, `.cc`, `.cxx`, `.h`, `.hpp` |
 | Scala | `.scala` |
 
 ### Features
@@ -116,9 +116,13 @@ class AstCodeSplitter {
 
 interface CodeChunk {
   content: string;
-  startLine: number;
-  endLine: number;
-  metadata?: Record<string, any>;
+  metadata: {
+    startLine: number;
+    endLine: number;
+    language?: string;
+    filePath?: string;
+    chunkKind?: ChunkKind;
+  };
 }
 ```
 
@@ -142,12 +146,12 @@ class LangChainCodeSplitter {
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@sharc-code/mcp` | 0.2.1 | MCP server for AI assistants |
-| `@sharc-code/splitter` | 0.2.0 | AST and LangChain code splitters |
+| `@sharc-code/mcp` | 0.2.11 | MCP server for AI assistants |
+| `@sharc-code/splitter` | 0.2.4 | AST and LangChain code splitters |
 
 ## Links
 
 - [MCP Package on NPM](https://www.npmjs.com/package/@sharc-code/mcp)
 - [Splitter Package on NPM](https://www.npmjs.com/package/@sharc-code/splitter)
-- [GitHub Repository](https://github.com/yxanul/SHARC)
+- [GitHub Repository](https://github.com/yxanul/sharc-docs)
 

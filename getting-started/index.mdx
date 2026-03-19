@@ -10,7 +10,7 @@ SHARC provides semantic code search capabilities through the Model Context Proto
 Before you begin, ensure you have:
 
 - **Node.js 18+** or **Bun 1.0+** installed
-- A **SHARC API key** from your plan
+- A **SHARC API key** — sign in at [sharc.sh](https://www.sharc.sh) with Google or GitHub, then create one at [Dashboard > API Keys](https://www.sharc.sh/dashboard/api-keys)
 - An MCP-compatible AI assistant (Claude Code, Cursor, VS Code, etc.)
 
 ## Quick Start
@@ -19,7 +19,7 @@ The fastest way to get started is with **Claude Code**:
 
 ```bash
 claude mcp add sharc \
-  -e SHARC_API_KEY=your_api_key \
+  -e SHARC_API_KEY=sk_mcp_e364ff9... \
   -- npx @sharc-code/mcp@latest
 ```
 
@@ -58,12 +58,4 @@ That's it! Now you can index and search your codebases:
 3. **Get precise results** - Receive ranked code snippets with relevance scores
 4. **Stay updated** - File watching keeps your index current as you code
 
-## Performance
-
-SHARC supports two performance tiers:
-
-| Tier | Summary | Best for |
-|------|---------|----------|
-| Standard | Slower baseline tier with higher latency. | General usage and non-latency-critical workflows. |
-| Performance | Fastest tier with the lowest latency. | Interactive workflows where speed is critical. |
 

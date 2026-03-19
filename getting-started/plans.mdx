@@ -1,0 +1,50 @@
+---
+title: Plans and usage
+description: Token budgets, plan limits, and what happens when you reach your quota
+---
+
+SHARC plans are based on a monthly token budget. Tokens are consumed by both indexing (embeddings) and searching (reranking) at the same rate — 1 embedding token = 1 rerank token.
+
+## Plans
+
+| Plan | Tokens / month | Repos | API keys | Price |
+|------|---------------:|------:|---------:|------:|
+| **Free** | 5M | 2 | 1 | $0 |
+| **Starter** | 75M | 10 | 5 | $12/mo |
+| **Pro** | 250M | 40 | 20 | $29/mo |
+| **Business** | 1B | Unlimited | 100 | $99/mo |
+| **Enterprise** | Unlimited | Unlimited | Unlimited | [Contact us](mailto:contact@sharc.sh) |
+
+View pricing and subscribe at [sharc.sh/pricing](https://www.sharc.sh/pricing).
+
+## How tokens are counted
+
+Every indexing and search operation consumes tokens from your monthly budget:
+
+- **Indexing** (`/v1/index`): tokens are consumed when generating embeddings for your code chunks. Larger codebases use more tokens on the first index, but incremental syncs only re-embed changed files.
+- **Searching** (`/v1/search`): tokens are consumed for embedding the query and reranking results. Each search uses a small number of tokens compared to indexing.
+
+Token usage is tracked per billing period and resets each month.
+
+## Tracking usage
+
+Monitor your token consumption at [Dashboard > Usage](https://www.sharc.sh/dashboard/usage), which shows:
+
+- Total tokens consumed over 7, 14, or 30 days
+- Daily breakdown by endpoint (`/v1/search`, `/v1/index`)
+- Embedding and rerank token split
+
+## What happens at the quota limit
+
+When your monthly token budget is exhausted:
+
+- **Indexing stops** — `index_codebase` calls will fail with a quota error. Your existing index remains intact and searchable.
+- **Searches stop** — `search_code` calls will fail with a quota error.
+- **File watching pauses** — incremental updates cannot process until quota is available.
+- **Existing data is preserved** — nothing is deleted. Your indexed codebases remain stored and ready once quota resets or you upgrade.
+
+The MCP server returns a `402` error with a message indicating you've reached your monthly quota and suggesting a plan upgrade.
+
+## Upgrading
+
+Manage your plan at [Dashboard > Plan](https://www.sharc.sh/dashboard/plan). Upgrades take effect immediately with prorated billing. Downgrades take effect at the end of the current billing period.
