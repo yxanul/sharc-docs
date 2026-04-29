@@ -13,7 +13,15 @@ SHARC MCP server authenticates using your SHARC API key.
 
 ## Set your API key
 
-### In MCP configuration (recommended)
+The recommended way is to set `SHARC_API_KEY` directly in your MCP client's server configuration. Each client has its own format — see the per-client guides for the exact one-command install:
+
+- [Claude Code](/getting-started/claude-code)
+- [Codex](/getting-started/codex)
+- [Droid](/getting-started/droid)
+- [OpenCode](/getting-started/opencode)
+- [Other clients](/getting-started/other-clients) (Cursor, VS Code, Windsurf, Zed, Claude Desktop, etc.)
+
+Generic stdio MCP example:
 
 ```json
 {
@@ -22,19 +30,11 @@ SHARC MCP server authenticates using your SHARC API key.
       "command": "npx",
       "args": ["-y", "@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
 }
-```
-
-### Via `.env.local` (optional)
-
-Create `.env.local` in your MCP package directory:
-
-```bash
-SHARC_API_KEY=sk_mcp_e364ff9...
 ```
 
 ## Troubleshooting

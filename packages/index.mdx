@@ -11,20 +11,18 @@ SHARC publishes two packages to NPM for integration into your projects.
 
 The MCP server that provides semantic code search to AI assistants.
 
-### Installation
+### Run on demand
+
+Most users don't install this package directly — your MCP client launches it via `npx`:
 
 ```bash
-npm install @sharc-code/mcp
-# or
-npx @sharc-code/mcp
+npx -y @sharc-code/mcp@latest
 ```
 
 ### Usage with Claude Code
 
 ```bash
-claude mcp add sharc \
-  -e SHARC_API_KEY=sk_mcp_e364ff9... \
-  -- npx @sharc-code/mcp
+claude mcp add sharc -e SHARC_API_KEY=sk_mcp_... -- npx -y @sharc-code/mcp@latest
 ```
 
 ### Features
@@ -146,8 +144,8 @@ class LangChainCodeSplitter {
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| `@sharc-code/mcp` | 0.2.11 | MCP server for AI assistants |
-| `@sharc-code/splitter` | 0.2.4 | AST and LangChain code splitters |
+| `@sharc-code/mcp` | 0.2.22 | MCP server for AI assistants |
+| `@sharc-code/splitter` | 0.2.8 | AST and LangChain code splitters |
 
 ## Links
 

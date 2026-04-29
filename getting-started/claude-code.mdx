@@ -1,48 +1,57 @@
 ---
-title: Claude Code Setup
-description: Configure SHARC with Claude Code for semantic code search
+title: Claude Code
+description: Add SHARC to Claude Code with a single command
 ---
 
-Claude Code is the recommended way to use SHARC. This guide covers the complete setup process.
+Claude Code ships with a first-class MCP CLI. One command and you're done.
 
-## Quick Setup
-
-Add SHARC to Claude Code with a single command:
+## Quick install
 
 ```bash
-claude mcp add sharc \
-  -e SHARC_API_KEY=sk_mcp_e364ff9... \
-  -- npx @sharc-code/mcp@latest
+claude mcp add sharc -e SHARC_API_KEY=sk_mcp_... -- npx -y @sharc-code/mcp@latest
 ```
 
-Restart Claude Code, and you're ready to go!
+Restart Claude Code and the seven SHARC tools become available.
 
-## Manual Configuration
+<Note>
+  Use `-s user` to install for your user (available across all projects) or `-s project` to commit a `.mcp.json` to the repo so teammates get it automatically. Default is `local` (this project, your machine).
+</Note>
 
-If you prefer manual configuration, add this to your Claude Code settings:
+## Verify
+
+```bash
+claude mcp list
+```
+
+Look for a `sharc` entry. From inside Claude Code, ask:
+
+```
+> List the MCP tools you have available
+```
+
+You should see `index_codebase`, `search_code`, `clear_index`, `get_indexing_status`, `start_watch`, `stop_watch`, `get_watch_status`.
+
+## Manual configuration (alternative)
+
+If you'd rather edit JSON directly, add this to your Claude Code MCP config:
 
 ```json
 {
   "mcpServers": {
     "sharc": {
       "command": "npx",
-      "args": ["@sharc-code/mcp@latest"],
+      "args": ["-y", "@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
 }
 ```
 
-### Settings File Location
+## Usage examples
 
-- **macOS/Linux**: `~/.config/claude-code/settings.json`
-- **Windows**: `%APPDATA%\claude-code\settings.json`
-
-## Usage Examples
-
-### Indexing a Codebase
+### Indexing a codebase
 
 ```
 > Please index this codebase for semantic search
@@ -56,7 +65,7 @@ If you prefer manual configuration, add this to your Claude Code settings:
   ⎿ ✓ Indexed 2,450 chunks in 18.3s
 ```
 
-### Searching Code
+### Searching code
 
 ```
 > How does the authentication middleware work?
@@ -70,16 +79,11 @@ If you prefer manual configuration, add this to your Claude Code settings:
      Location: src/middleware/auth.ts:45-89
      Score: 0.9847
      ... +44 lines (ctrl+o to expand)
-
-  2. Code snippet (typescript) [project]
-     Location: src/routes/login.ts:12-56
-     Score: 0.9234
-     ... +44 lines (ctrl+o to expand)
 ```
 
-### Incremental Updates
+### Incremental updates
 
-After the initial index, SHARC automatically watches for file changes:
+After the initial index, SHARC watches the working tree and re-indexes changed files automatically:
 
 ```
 > I just modified the auth middleware, is the index updated?
@@ -87,14 +91,13 @@ After the initial index, SHARC automatically watches for file changes:
 ● get_watch_status (MCP)
   ⎿ Watching: /Users/you/project
   ⎿ Last update: 2 seconds ago
-  ⎿ Files processed: auth.ts (modified)
 ```
 
-## Best Practices
+## Best practices
 
-### 1. Index Before Deep Dives
+### Index before deep dives
 
-For the best experience, index your codebase before asking complex questions:
+For the best experience, index before asking complex questions:
 
 ```
 > Before we start, please index this codebase
@@ -104,7 +107,7 @@ For the best experience, index your codebase before asking complex questions:
 > Now, explain the data flow from API request to database
 ```
 
-### 2. Use Natural Language Queries
+### Use natural language queries
 
 SHARC understands semantic meaning, not just keywords:
 
@@ -119,7 +122,7 @@ SHARC understands semantic meaning, not just keywords:
 "config.ts" (use glob patterns for file search)
 ```
 
-### 3. Adjust Result Limits
+### Adjust result limits
 
 For broad exploration, increase the limit:
 
@@ -127,29 +130,22 @@ For broad exploration, increase the limit:
 > Search for all API endpoints with limit 10
 ```
 
-For specific answers, keep it low (default 3):
-
-```
-> Where is JWT token validation implemented?
-```
+For specific answers, keep it low (default 3).
 
 ## Troubleshooting
 
-### Tools Not Available
-
-If SHARC tools don't appear, try:
+### Tools not available
 
 1. Restart Claude Code
-2. Check the MCP server output: `claude mcp logs sharc`
-3. Verify environment variables are set
+2. Run `claude mcp list` and confirm `sharc` is listed
+3. Verify the API key is correct: `claude mcp get sharc`
 
-### Slow Indexing
+### Slow indexing
 
-Initial indexing time depends on codebase size. Medium-sized repos (e.g., Hono) take ~30-45 seconds, while large repos (e.g., Next.js) can take 3-4 minutes. Subsequent runs use Merkle diff for near-instant updates.
+Initial indexing time depends on codebase size. The Hono repo takes ~30-45 seconds; large repos like Next.js can take 3-4 minutes. Subsequent runs use Merkle diff for near-instant updates.
 
-### Search Returns Unexpected Results
+### Search returns unexpected results
 
 - Try rephrasing your query semantically
 - Use `extensionFilter` to narrow to specific file types
 - Check if the codebase is fully indexed with `get_indexing_status`
-

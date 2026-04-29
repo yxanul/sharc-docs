@@ -1,0 +1,78 @@
+---
+title: OpenCode
+description: Add SHARC to OpenCode by editing opencode.json
+---
+
+OpenCode reads MCP servers from `opencode.json`. The interactive `opencode mcp add` command can't set environment variables, so we recommend editing the config file directly — it's a single 6-line block.
+
+## Install
+
+Open your OpenCode config file:
+
+- **macOS / Linux**: `~/.config/opencode/opencode.json`
+- **Windows**: `%USERPROFILE%\.config\opencode\opencode.json`
+
+Add a `sharc` entry under `mcp`:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "sharc": {
+      "type": "local",
+      "command": ["npx", "-y", "@sharc-code/mcp@latest"],
+      "enabled": true,
+      "environment": {
+        "SHARC_API_KEY": "sk_mcp_..."
+      }
+    }
+  }
+}
+```
+
+If `opencode.json` already exists, just add the `sharc` block inside the `mcp` object — keep your other entries.
+
+## Verify
+
+```bash
+opencode mcp list
+```
+
+You should see `sharc` with a `✓ connected` status.
+
+From inside OpenCode, ask:
+
+```
+> List the MCP tools you have available
+```
+
+You should see seven SHARC tools (`index_codebase`, `search_code`, `clear_index`, `get_indexing_status`, `start_watch`, `stop_watch`, `get_watch_status`).
+
+## Keep the API key out of config (optional)
+
+OpenCode supports `{env:VAR}` substitution. Set `SHARC_API_KEY` in your shell environment and reference it instead of pasting the literal key:
+
+```json
+{
+  "mcp": {
+    "sharc": {
+      "type": "local",
+      "command": ["npx", "-y", "@sharc-code/mcp@latest"],
+      "enabled": true,
+      "environment": {
+        "SHARC_API_KEY": "{env:SHARC_API_KEY}"
+      }
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+### `MCP error -32000: Connection closed`
+
+If `opencode mcp list` shows `sharc` as `failed`:
+
+- Confirm the `environment` block exists and `SHARC_API_KEY` is set
+- Confirm `npx` is on your PATH: `npx --version`
+- Check OpenCode logs: `opencode --log-level DEBUG`

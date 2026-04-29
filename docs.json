@@ -20,6 +20,9 @@
               "getting-started/index",
               "getting-started/installation",
               "getting-started/claude-code",
+              "getting-started/codex",
+              "getting-started/droid",
+              "getting-started/opencode",
               "getting-started/other-clients",
               "getting-started/plans"
             ]

@@ -9,18 +9,16 @@ SHARC provides semantic code search capabilities through the Model Context Proto
 
 Before you begin, ensure you have:
 
-- **Node.js 18+** or **Bun 1.0+** installed
-- A **SHARC API key** — sign in at [sharc.sh](https://www.sharc.sh) with Google or GitHub, then create one at [Dashboard > API Keys](https://www.sharc.sh/dashboard/api-keys)
-- An MCP-compatible AI assistant (Claude Code, Cursor, VS Code, etc.)
+- **Node.js 18+** installed
+- A **SHARC API key** — sign in at [sharc.sh](https://www.sharc.sh) with Google or GitHub, then create one at [Dashboard → API Keys](https://www.sharc.sh/dashboard/api-keys)
+- An MCP-compatible AI assistant (Claude Code, Codex, Droid, OpenCode, Cursor, etc.)
 
 ## Quick Start
 
 The fastest way to get started is with **Claude Code**:
 
 ```bash
-claude mcp add sharc \
-  -e SHARC_API_KEY=sk_mcp_e364ff9... \
-  -- npx @sharc-code/mcp@latest
+claude mcp add sharc -e SHARC_API_KEY=sk_mcp_... -- npx -y @sharc-code/mcp@latest
 ```
 
 That's it! Now you can index and search your codebases:
@@ -43,11 +41,20 @@ That's it! Now you can index and search your codebases:
   <Card title="Installation" href="/getting-started/installation">
     Detailed installation instructions and requirements.
   </Card>
-  <Card title="Claude Code Setup" href="/getting-started/claude-code">
-    Complete guide for Claude Code integration.
+  <Card title="Claude Code" href="/getting-started/claude-code">
+    Single-command setup with `claude mcp add`.
+  </Card>
+  <Card title="Codex" href="/getting-started/codex">
+    CLI/TUI and desktop GUI walkthroughs.
+  </Card>
+  <Card title="Droid" href="/getting-started/droid">
+    Set up SHARC in Factory's Droid CLI.
+  </Card>
+  <Card title="OpenCode" href="/getting-started/opencode">
+    Drop a snippet into `opencode.json`.
   </Card>
   <Card title="Other Clients" href="/getting-started/other-clients">
-    Setup guides for Cursor, VS Code, Windsurf, and more.
+    Cursor, VS Code, Windsurf, Zed, Claude Desktop, and more.
   </Card>
 </CardGroup>
 

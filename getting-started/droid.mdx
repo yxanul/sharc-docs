@@ -1,0 +1,53 @@
+---
+title: Droid
+description: Add SHARC to Factory's Droid CLI
+---
+
+[Droid](https://factory.ai) is Factory's terminal coding agent. It exposes an `mcp` subcommand for managing MCP servers.
+
+## Install
+
+```bash
+droid mcp add sharc --env SHARC_API_KEY=sk_mcp_... npx -y @sharc-code/mcp@latest
+```
+
+<Note>
+  Droid takes the launch command directly as positional arguments — there's no `--` separator like Claude Code or Codex.
+</Note>
+
+Verify:
+
+```bash
+droid mcp list
+```
+
+## How it works
+
+The command above creates a **stdio** MCP server entry (Droid's default). The `--env` flag is repeatable for multiple environment variables.
+
+Droid spawns `npx -y @sharc-code/mcp@latest` whenever it starts a session, with `SHARC_API_KEY` set in the child process's environment.
+
+## Updating the API key
+
+```bash
+droid mcp remove sharc
+droid mcp add sharc --env SHARC_API_KEY=sk_mcp_NEW... npx -y @sharc-code/mcp@latest
+```
+
+## Verify
+
+Ask Droid:
+
+```
+> List the MCP tools you have available
+```
+
+You should see seven SHARC tools (`index_codebase`, `search_code`, `clear_index`, `get_indexing_status`, `start_watch`, `stop_watch`, `get_watch_status`).
+
+## Troubleshooting
+
+### Server not connecting
+
+- Confirm `npx` is on your PATH: `npx --version`
+- Re-run `droid mcp list` to see the configured command
+- Check that `SHARC_API_KEY` was set correctly when adding the server

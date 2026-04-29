@@ -1,13 +1,13 @@
 ---
 title: Other MCP Clients
-description: Configure SHARC with Cursor, VS Code, Windsurf, and other MCP clients
+description: Configure SHARC with Cursor, VS Code, Windsurf, and other MCP-compatible clients
 ---
 
-SHARC works with any MCP-compatible AI assistant. This guide covers setup for popular clients.
+SHARC works with any MCP-compatible client. For agentic CLIs and TUIs (Claude Code, Codex, Droid, OpenCode), see their dedicated setup pages — they have one-command installers. The clients below are typically configured by editing a JSON file.
 
 ## Cursor
 
-Add to your Cursor settings (`~/.cursor/mcp.json`):
+Add to your Cursor MCP config (`~/.cursor/mcp.json` for global, or `.cursor/mcp.json` in a project):
 
 ```json
 {
@@ -16,16 +16,16 @@ Add to your Cursor settings (`~/.cursor/mcp.json`):
       "command": "npx",
       "args": ["-y", "@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
 }
 ```
 
-## VS Code (Cline Extension)
+## VS Code (Cline)
 
-For the Cline extension, add to your VS Code settings:
+Add to your VS Code settings (`settings.json`):
 
 ```json
 {
@@ -34,7 +34,7 @@ For the Cline extension, add to your VS Code settings:
       "command": "npx",
       "args": ["-y", "@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
@@ -43,7 +43,7 @@ For the Cline extension, add to your VS Code settings:
 
 ## Windsurf
 
-Add to your Windsurf configuration:
+Add to your Windsurf MCP config:
 
 ```json
 {
@@ -52,7 +52,7 @@ Add to your Windsurf configuration:
       "command": "npx",
       "args": ["-y", "@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
@@ -61,7 +61,10 @@ Add to your Windsurf configuration:
 
 ## Claude Desktop
 
-Add to Claude Desktop's MCP configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+Add to Claude Desktop's MCP config:
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -70,23 +73,7 @@ Add to Claude Desktop's MCP configuration (`~/Library/Application Support/Claude
       "command": "npx",
       "args": ["-y", "@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
-      }
-    }
-  }
-}
-```
-
-## Void
-
-```json
-{
-  "mcp": {
-    "sharc": {
-      "command": "npx",
-      "args": ["-y", "@sharc-code/mcp@latest"],
-      "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
@@ -105,8 +92,24 @@ Add to your Zed settings (`~/.config/zed/settings.json`):
         "path": "npx",
         "args": ["-y", "@sharc-code/mcp@latest"],
         "env": {
-          "SHARC_API_KEY": "sk_mcp_e364ff9..."
+          "SHARC_API_KEY": "sk_mcp_..."
         }
+      }
+    }
+  }
+}
+```
+
+## Void
+
+```json
+{
+  "mcp": {
+    "sharc": {
+      "command": "npx",
+      "args": ["-y", "@sharc-code/mcp@latest"],
+      "env": {
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
@@ -122,16 +125,16 @@ Add to your Zed settings (`~/.config/zed/settings.json`):
       "command": "npx",
       "args": ["-y", "@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
 }
 ```
 
-## Generic MCP Configuration
+## Generic stdio MCP configuration
 
-For any MCP-compatible client, the configuration follows this pattern:
+For any MCP-compatible client that accepts stdio servers, the shape is the same:
 
 ```json
 {
@@ -140,47 +143,24 @@ For any MCP-compatible client, the configuration follows this pattern:
       "command": "npx",
       "args": ["-y", "@sharc-code/mcp@latest"],
       "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
+        "SHARC_API_KEY": "sk_mcp_..."
       }
     }
   }
 }
 ```
 
-### Using Node Instead of npx
+## Troubleshooting
 
-If you've installed SHARC globally:
+### Tools don't appear
 
-```json
-{
-  "mcpServers": {
-    "sharc": {
-      "command": "node",
-      "args": ["/path/to/node_modules/@sharc-code/mcp/dist/index.js"],
-      "env": {
-        "SHARC_API_KEY": "sk_mcp_e364ff9..."
-      }
-    }
-  }
-}
-```
+1. Restart the client after editing config — most clients only load MCP servers at startup.
+2. Confirm the JSON is valid (no trailing commas, balanced braces).
+3. Check that `SHARC_API_KEY` is on the SHARC server entry.
 
-## Common Issues
+### `npx` not found on Windows
 
-### npx Not Found
-
-If npx isn't in your PATH, use the full path:
-
-```json
-{
-  "command": "/usr/local/bin/npx",
-  "args": ["-y", "@sharc-code/mcp@latest"]
-}
-```
-
-### Windows Path Issues
-
-On Windows, use forward slashes or escaped backslashes:
+If a client can't find `npx`, point at the full path:
 
 ```json
 {
@@ -188,11 +168,3 @@ On Windows, use forward slashes or escaped backslashes:
   "args": ["-y", "@sharc-code/mcp@latest"]
 }
 ```
-
-### Environment Variables Not Loaded
-
-Some clients require you to restart after changing MCP configuration. If environment variables aren't being read:
-
-1. Close the application completely
-2. Reopen and test with `get_watch_status` tool
-
